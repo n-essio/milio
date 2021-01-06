@@ -21,7 +21,7 @@ public class Milio {
     Result hello(@Body Location location, @Param String id, @Header("authorization") String authorization) {
         logger.info("id:" + id);
         logger.info("location:" + location);
-        logger.info("authorization:" + authorization);
+       // logger.info("authorization:" + authorization);
         logger.info("count:" + atomicInteger.addAndGet(1));
         logger.info("-------------------");
         return new Result("ok");
