@@ -1,0 +1,46 @@
+name: Maven & Docker
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Compile, Build Native, Build Docker Image, Push on Github
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v2.1.0
+        with:
+          fetch-depth: 1
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+
+      - name: Maven Package
+        run: mvn clean package -DskipTests=true 
+      - name: Publish Image
+        uses: matootie/github-docker@v3.0.0
+        with:
+          accessToken: ${{ github.token }}
+          contextName: src/main/docker/Dockerfile.jvm
+      - name: Publish Image
+        uses: matootie/github-docker@v3.0.0
+        with:
+          accessToken: ${{ github.token }}
+          contextName: src/main/docker/Dockerfile.jvm
+      - name: docker-compose update using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            docker-compose -f ~/services/milio/docker-compose.yml pull
+            docker-compose -f ~/services/milio/docker-compose.yml stop
+            docker-compose -f ~/services/milio/docker-compose.yml up -d
